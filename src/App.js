@@ -10,6 +10,7 @@ import KeyboardSelector from './components/KeyboardSelector';
 import ColorPalette from './components/ColorPalette';
 import DesignGenerator from './components/DesignGenerator';
 import LandingPage from './components/LandingPage';
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const theme = createTheme({
   palette: {
@@ -101,6 +102,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <LandingPage onGetStarted={handleGetStarted} />
+        <SpeedInsights />
       </ThemeProvider>
     );
   }
@@ -152,6 +154,7 @@ function App() {
           </Grid>
         </Box>
       </Container>
+      <SpeedInsights />
     </ThemeProvider>
   );
 }
