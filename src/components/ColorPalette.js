@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Box, Typography, Button, Chip, Tooltip } from '@mui/material';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Box, Typography, Button, Chip, Tooltip, Grid, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
+import CloseIcon from '@mui/icons-material/Close';
 
-const ColorPalette = ({ onSelect }) => {
-  const [selectedColors, setSelectedColors] = useState([]);
-  const colorSchemes = [
+const ColorPalette = ({ onSelect, onCustomColorSelect, selectedColors }) => {
+  const [availableColors, setAvailableColors] = useState([]);
+  
+  const colorSchemes = useMemo(() => [
     {
       name: 'Monochrome',
       colors: ['#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff'],
@@ -25,59 +27,132 @@ const ColorPalette = ({ onSelect }) => {
       name: 'Ocean',
       colors: ['#000080', '#0000FF', '#1E90FF', '#00BFFF', '#87CEEB'],
     },
-  ];
+    {
+      name: 'Sunset',
+      colors: ['#FF4500', '#FF6347', '#FF7F50', '#FFA07A', '#FFD700'],
+    },
+    {
+      name: 'Forest',
+      colors: ['#006400', '#228B22', '#32CD32', '#90EE90', '#98FB98'],
+    },
+    {
+      name: 'Cyberpunk',
+      colors: ['#FF00FF', '#00FFFF', '#FF1493', '#FFFF00', '#1E90FF'],
+    },
+    {
+      name: 'Retro',
+      colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FAD02E', '#FF9900'],
+    },
+    {
+      name: 'Minimalist',
+      colors: ['#FFFFFF', '#EEEEEE', '#DDDDDD', '#CCCCCC', '#000000'],
+    },
+    // National Flag Color Schemes
+    {
+      name: 'USA Flag',
+      colors: ['#B22234', '#FFFFFF', '#3C3B6E'],
+    },
+    {
+      name: 'UK Flag',
+      colors: ['#C8102E', '#FFFFFF', '#012169'],
+    },
+    {
+      name: 'German Flag',
+      colors: ['#000000', '#DD0000', '#FFCE00'],
+    },
+    {
+      name: 'French Flag',
+      colors: ['#002395', '#FFFFFF', '#ED2939'],
+    },
+    {
+      name: 'Italian Flag',
+      colors: ['#009246', '#FFFFFF', '#CE2B37'],
+    },
+    {
+      name: 'Japanese Flag',
+      colors: ['#FFFFFF', '#BC002D'],
+    },
+    {
+      name: 'Brazilian Flag',
+      colors: ['#009c3b', '#FFDF00', '#002776', '#FFFFFF'],
+    },
+    {
+      name: 'Indian Flag',
+      colors: ['#FF9933', '#FFFFFF', '#138808', '#000080'],
+    },
+  ], []);
 
   const handleColorSelect = (color) => {
-    const updatedColors = selectedColors.includes(color)
-      ? selectedColors.filter((c) => c !== color)
-      : [...selectedColors, color];
-    setSelectedColors(updatedColors);
+    if (!selectedColors.includes(color)) {
+      const updatedColors = [...selectedColors, color];
+      onSelect(updatedColors);
+    }
+  };
+
+  const handleColorRemove = (color) => {
+    const updatedColors = selectedColors.filter(c => c !== color);
     onSelect(updatedColors);
   };
 
   const handleSchemeSelect = (scheme) => {
-    setSelectedColors(scheme.colors);
     onSelect(scheme.colors);
   };
 
+  useEffect(() => {
+    const allColors = colorSchemes.flatMap(scheme => scheme.colors);
+    const uniqueColors = [...new Set(allColors)];
+    setAvailableColors(uniqueColors);
+    onCustomColorSelect(uniqueColors);
+  }, [colorSchemes, onCustomColorSelect]);
+
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
+    <Box sx={{ p: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
         Color Schemes
       </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+      <Grid container spacing={1} sx={{ mb: 3 }}>
         {colorSchemes.map((scheme) => (
-          <Button
-            key={scheme.name}
-            variant="outlined"
-            onClick={() => handleSchemeSelect(scheme)}
-          >
-            {scheme.name}
-          </Button>
+          <Grid item key={scheme.name}>
+            <Button
+              variant="contained"
+              onClick={() => handleSchemeSelect(scheme)}
+              sx={{
+                background: `linear-gradient(to right, ${scheme.colors.join(', ')})`,
+                color: '#fff',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+                '&:hover': {
+                  opacity: 0.9,
+                },
+              }}
+            >
+              {scheme.name}
+            </Button>
+          </Grid>
         ))}
-      </Box>
-      <Typography variant="h6" gutterBottom>
+      </Grid>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
         Custom Colors
       </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-        {colorSchemes.flatMap((scheme) =>
-          scheme.colors.map((color) => (
-            <Tooltip title={color} key={color}>
-              <Chip
-                label={color}
-                sx={{
-                  bgcolor: color,
-                  color: color === '#ffffff' ? '#000000' : '#ffffff',
-                  border: selectedColors.includes(color) ? '2px solid #ffffff' : 'none',
-                }}
-                onClick={() => handleColorSelect(color)}
-              />
-            </Tooltip>
-          ))
-        )}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
+        {availableColors.map((color) => (
+          <Tooltip title={color} key={color}>
+            <Chip
+              label={color}
+              sx={{
+                bgcolor: color,
+                color: color === '#ffffff' ? '#000000' : '#ffffff',
+                border: selectedColors.includes(color) ? '2px solid #000000' : 'none',
+                '&:hover': {
+                  opacity: 0.8,
+                },
+              }}
+              onClick={() => handleColorSelect(color)}
+            />
+          </Tooltip>
+        ))}
       </Box>
-      <Typography variant="subtitle1" sx={{ mt: 2 }}>
-        Selected Colors:
+      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333' }}>
+        Selected Colors for Generation
       </Typography>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
         {selectedColors.map((color) => (
@@ -88,18 +163,33 @@ const ColorPalette = ({ onSelect }) => {
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.8 }}
           >
-            <Tooltip title={color}>
+            <Tooltip title={`Remove ${color}`}>
               <Box
                 sx={{
-                  width: 24,
-                  height: 24,
+                  width: 36,
+                  height: 36,
                   borderRadius: '50%',
                   bgcolor: color,
-                  border: '1px solid #ffffff',
+                  border: '2px solid #ffffff',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                   cursor: 'pointer',
+                  position: 'relative',
                 }}
-                onClick={() => handleColorSelect(color)}
-              />
+                onClick={() => handleColorRemove(color)}
+              >
+                <IconButton
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    top: -8,
+                    right: -8,
+                    bgcolor: 'white',
+                    '&:hover': { bgcolor: 'white' },
+                  }}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
             </Tooltip>
           </motion.div>
         ))}

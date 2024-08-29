@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import { keyboardLayouts } from '../utils/keyboardLayouts';
 import { motion } from 'framer-motion';
 
-const SVGRenderer = ({ design }) => {
+const SVGRenderer = ({ design, onKeyClick }) => {
   const [scale, setScale] = useState(1);
   const containerRef = useRef(null);
   const svgRef = useRef(null);
@@ -53,7 +53,7 @@ const SVGRenderer = ({ design }) => {
     return luma < 128 ? '#ffffff' : '#000000';
   };
 
-  const renderKey = (keyData, color, x, y) => {
+  const renderKey = (keyData, color, x, y, rowIndex, keyIndex) => {
     const keyWidth = keyData.width * keySize + (keyData.width - 1) * spacing;
     const textColor = getContrastColor(color);
 
@@ -63,6 +63,7 @@ const SVGRenderer = ({ design }) => {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.3 }}
+        onClick={(event) => onKeyClick(rowIndex, keyIndex, event)}
       >
         <motion.rect
           x={x}
@@ -99,8 +100,10 @@ const SVGRenderer = ({ design }) => {
     return row.map((keyData, keyIndex) => {
       const x = xOffset * (keySize + spacing);
       const y = rowIndex * (keySize + spacing);
-      const color = design.colors[Math.floor(Math.random() * design.colors.length)];
-      const key = renderKey(keyData, color, x, y);
+      const color = design.keyColors && design.keyColors[rowIndex] && design.keyColors[rowIndex][keyIndex]
+        ? design.keyColors[rowIndex][keyIndex]
+        : design.colors[keyIndex % design.colors.length]; // Use a consistent color for each key
+      const key = renderKey(keyData, color, x, y, rowIndex, keyIndex);
       xOffset += keyData.width;
       return key;
     });

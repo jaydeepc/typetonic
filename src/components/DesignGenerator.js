@@ -1,25 +1,97 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button, CircularProgress, Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 
 const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated }) => {
-  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateDesign = async () => {
+  const generateRandomPattern = useCallback(() => {
+    const patterns = ['gradient', 'alternating', 'random', 'grouped', 'centered'];
+    return patterns[Math.floor(Math.random() * patterns.length)];
+  }, []);
+
+  const generateKeyColors = useCallback((pattern, colors) => {
+    const keyColors = [];
+    const rows = 6; // Assume a standard keyboard layout
+    const keysPerRow = 15;
+
+    switch (pattern) {
+      case 'gradient':
+        for (let i = 0; i < rows; i++) {
+          keyColors.push(new Array(keysPerRow).fill(null).map((_, j) => {
+            const index = Math.floor((i * keysPerRow + j) / (rows * keysPerRow) * colors.length);
+            return colors[index];
+          }));
+        }
+        break;
+      case 'alternating':
+        for (let i = 0; i < rows; i++) {
+          keyColors.push(new Array(keysPerRow).fill(null).map((_, j) => {
+            return colors[(i + j) % colors.length];
+          }));
+        }
+        break;
+      case 'random':
+        for (let i = 0; i < rows; i++) {
+          keyColors.push(new Array(keysPerRow).fill(null).map(() => {
+            return colors[Math.floor(Math.random() * colors.length)];
+          }));
+        }
+        break;
+      case 'grouped':
+        const groupSize = Math.floor(keysPerRow / colors.length);
+        for (let i = 0; i < rows; i++) {
+          const rowColors = [];
+          for (let j = 0; j < colors.length; j++) {
+            rowColors.push(...new Array(groupSize).fill(colors[j]));
+          }
+          keyColors.push(rowColors.slice(0, keysPerRow));
+        }
+        break;
+      case 'centered':
+        const centerColor = colors[0];
+        const outerColor = colors[colors.length - 1];
+        for (let i = 0; i < rows; i++) {
+          keyColors.push(new Array(keysPerRow).fill(null).map((_, j) => {
+            const distanceFromCenter = Math.abs(j - Math.floor(keysPerRow / 2)) + Math.abs(i - Math.floor(rows / 2));
+            return distanceFromCenter < 3 ? centerColor : outerColor;
+          }));
+        }
+        break;
+      default:
+        // Default to random if pattern is not recognized
+        for (let i = 0; i < rows; i++) {
+          keyColors.push(new Array(keysPerRow).fill(null).map(() => {
+            return colors[Math.floor(Math.random() * colors.length)];
+          }));
+        }
+    }
+
+    return keyColors;
+  }, []);
+
+  const simulateClaudeAPI = useCallback(async (keyboardType, colors) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const pattern = generateRandomPattern();
+        const keyColors = generateKeyColors(pattern, colors);
+        const design = {
+          keyboardType,
+          colors,
+          keyColors,
+          pattern,
+        };
+        resolve(design);
+      }, 2000); // Simulate a 2-second delay
+    });
+  }, [generateRandomPattern, generateKeyColors]);
+
+  const generateDesign = useCallback(async () => {
+    if (isGenerating || !selectedKeyboard || selectedColors.length === 0) {
+      return;
+    }
+
     setIsGenerating(true);
-    // Simulated API call to Claude
-    const simulateClaudeAPI = async (keyboardType, colors) => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const design = {
-            keyboardType,
-            colors,
-            // Add more design details here
-          };
-          resolve(design);
-        }, 2000); // Simulate a 2-second delay
-      });
-    };
 
     try {
       const design = await simulateClaudeAPI(selectedKeyboard, selectedColors);
@@ -30,7 +102,7 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated }
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [isGenerating, selectedKeyboard, selectedColors, simulateClaudeAPI, onDesignGenerated]);
 
   return (
     <Box sx={{ textAlign: 'center' }}>
@@ -64,7 +136,7 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated }
             Selected Keyboard: {selectedKeyboard || 'None'}
           </Typography>
           <Typography variant="body2">
-            Selected Colors: {selectedColors.length > 0 ? selectedColors.length : 'None'}
+            Selected Colors: {selectedColors.length > 0 ? selectedColors.join(', ') : 'None'}
           </Typography>
         </motion.div>
       )}
