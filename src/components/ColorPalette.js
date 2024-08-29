@@ -1,86 +1,59 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Box, Typography, Button, Chip, Tooltip, Grid, IconButton } from '@mui/material';
+import { Box, Typography, Button, Chip, Tooltip, Grid, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { motion } from 'framer-motion';
-import CloseIcon from '@mui/icons-material/Close';
 
 const ColorPalette = ({ onSelect, onCustomColorSelect, selectedColors }) => {
   const [availableColors, setAvailableColors] = useState([]);
+  const [selectedTheme, setSelectedTheme] = useState('custom');
   
-  const colorSchemes = useMemo(() => [
-    {
-      name: 'Monochrome',
-      colors: ['#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff'],
+  const colorSchemes = useMemo(() => ({
+    custom: { name: 'Custom', colors: [] },
+    countryFlags: {
+      name: 'Country Flags',
+      schemes: [
+        { name: 'USA', colors: ['#B22234', '#FFFFFF', '#3C3B6E'] },
+        { name: 'UK', colors: ['#C8102E', '#FFFFFF', '#012169'] },
+        { name: 'Germany', colors: ['#000000', '#DD0000', '#FFCE00'] },
+        { name: 'France', colors: ['#002395', '#FFFFFF', '#ED2939'] },
+        { name: 'Italy', colors: ['#009246', '#FFFFFF', '#CE2B37'] },
+        { name: 'Japan', colors: ['#FFFFFF', '#BC002D'] },
+        { name: 'Brazil', colors: ['#009c3b', '#FFDF00', '#002776', '#FFFFFF'] },
+        { name: 'India', colors: ['#FF9933', '#FFFFFF', '#138808', '#000080'] },
+      ]
     },
-    {
-      name: 'Pastel',
-      colors: ['#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF'],
+    nature: {
+      name: 'Nature',
+      schemes: [
+        { name: 'Forest', colors: ['#228B22', '#006400', '#32CD32', '#90EE90', '#98FB98'] },
+        { name: 'Ocean', colors: ['#000080', '#0000FF', '#1E90FF', '#00BFFF', '#87CEEB'] },
+        { name: 'Sunset', colors: ['#FF4500', '#FF6347', '#FF7F50', '#FFA07A', '#FFD700'] },
+      ]
     },
-    {
-      name: 'Neon',
-      colors: ['#FF00FF', '#00FFFF', '#00FF00', '#FFFF00', '#FF0000'],
+    mood: {
+      name: 'Mood',
+      schemes: [
+        { name: 'Pastel', colors: ['#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF'] },
+        { name: 'Neon', colors: ['#FF00FF', '#00FFFF', '#00FF00', '#FFFF00', '#FF0000'] },
+        { name: 'Monochrome', colors: ['#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff'] },
+      ]
     },
-    {
-      name: 'Earth Tones',
-      colors: ['#8B4513', '#A0522D', '#D2691E', '#DEB887', '#F4A460'],
+    horror: {
+      name: 'Horror',
+      schemes: [
+        { name: 'Blood', colors: ['#8B0000', '#FF0000', '#DC143C', '#000000', '#8B4513'] },
+        { name: 'Zombie', colors: ['#355E3B', '#4A0E4E', '#636B61', '#A3A847', '#000000'] },
+        { name: 'Ghost', colors: ['#E0FFFF', '#F8F8FF', '#DCDCDC', '#D3D3D3', '#000000'] },
+      ]
     },
-    {
-      name: 'Ocean',
-      colors: ['#000080', '#0000FF', '#1E90FF', '#00BFFF', '#87CEEB'],
+    monster: {
+      name: 'Monster',
+      schemes: [
+        { name: 'Dragon', colors: ['#B22222', '#FF4500', '#FFD700', '#000000', '#2F4F4F'] },
+        { name: 'Alien', colors: ['#00FF00', '#32CD32', '#7CFC00', '#000000', '#4B0082'] },
+        { name: 'Sea Monster', colors: ['#008080', '#20B2AA', '#00CED1', '#000000', '#4682B4'] },
+      ]
     },
-    {
-      name: 'Sunset',
-      colors: ['#FF4500', '#FF6347', '#FF7F50', '#FFA07A', '#FFD700'],
-    },
-    {
-      name: 'Forest',
-      colors: ['#006400', '#228B22', '#32CD32', '#90EE90', '#98FB98'],
-    },
-    {
-      name: 'Cyberpunk',
-      colors: ['#FF00FF', '#00FFFF', '#FF1493', '#FFFF00', '#1E90FF'],
-    },
-    {
-      name: 'Retro',
-      colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FAD02E', '#FF9900'],
-    },
-    {
-      name: 'Minimalist',
-      colors: ['#FFFFFF', '#EEEEEE', '#DDDDDD', '#CCCCCC', '#000000'],
-    },
-    // National Flag Color Schemes
-    {
-      name: 'USA Flag',
-      colors: ['#B22234', '#FFFFFF', '#3C3B6E'],
-    },
-    {
-      name: 'UK Flag',
-      colors: ['#C8102E', '#FFFFFF', '#012169'],
-    },
-    {
-      name: 'German Flag',
-      colors: ['#000000', '#DD0000', '#FFCE00'],
-    },
-    {
-      name: 'French Flag',
-      colors: ['#002395', '#FFFFFF', '#ED2939'],
-    },
-    {
-      name: 'Italian Flag',
-      colors: ['#009246', '#FFFFFF', '#CE2B37'],
-    },
-    {
-      name: 'Japanese Flag',
-      colors: ['#FFFFFF', '#BC002D'],
-    },
-    {
-      name: 'Brazilian Flag',
-      colors: ['#009c3b', '#FFDF00', '#002776', '#FFFFFF'],
-    },
-    {
-      name: 'Indian Flag',
-      colors: ['#FF9933', '#FFFFFF', '#138808', '#000080'],
-    },
-  ], []);
+  }), []);
 
   const handleColorSelect = (color) => {
     if (!selectedColors.includes(color)) {
@@ -98,8 +71,13 @@ const ColorPalette = ({ onSelect, onCustomColorSelect, selectedColors }) => {
     onSelect(scheme.colors);
   };
 
+  const handleThemeChange = (event) => {
+    setSelectedTheme(event.target.value);
+  };
+
   useEffect(() => {
-    const allColors = colorSchemes.flatMap(scheme => scheme.colors);
+    const allColors = Object.values(colorSchemes)
+      .flatMap(category => category.schemes ? category.schemes.flatMap(scheme => scheme.colors) : category.colors);
     const uniqueColors = [...new Set(allColors)];
     setAvailableColors(uniqueColors);
     onCustomColorSelect(uniqueColors);
@@ -110,25 +88,45 @@ const ColorPalette = ({ onSelect, onCustomColorSelect, selectedColors }) => {
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
         Color Schemes
       </Typography>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel id="theme-select-label">Theme</InputLabel>
+        <Select
+          labelId="theme-select-label"
+          id="theme-select"
+          value={selectedTheme}
+          label="Theme"
+          onChange={handleThemeChange}
+        >
+          {Object.entries(colorSchemes).map(([key, category]) => (
+            <MenuItem key={key} value={key}>{category.name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <Grid container spacing={1} sx={{ mb: 3 }}>
-        {colorSchemes.map((scheme) => (
-          <Grid item key={scheme.name}>
-            <Button
-              variant="contained"
-              onClick={() => handleSchemeSelect(scheme)}
-              sx={{
-                background: `linear-gradient(to right, ${scheme.colors.join(', ')})`,
-                color: '#fff',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
-                '&:hover': {
-                  opacity: 0.9,
-                },
-              }}
-            >
-              {scheme.name}
-            </Button>
+        {colorSchemes[selectedTheme].schemes ? (
+          colorSchemes[selectedTheme].schemes.map((scheme) => (
+            <Grid item key={scheme.name}>
+              <Button
+                variant="contained"
+                onClick={() => handleSchemeSelect(scheme)}
+                sx={{
+                  background: `linear-gradient(to right, ${scheme.colors.join(', ')})`,
+                  color: '#fff',
+                  textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+                  '&:hover': {
+                    opacity: 0.9,
+                  },
+                }}
+              >
+                {scheme.name}
+              </Button>
+            </Grid>
+          ))
+        ) : (
+          <Grid item>
+            <Typography>Select colors from the Custom Colors section below</Typography>
           </Grid>
-        ))}
+        )}
       </Grid>
       <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
         Custom Colors
@@ -176,20 +174,7 @@ const ColorPalette = ({ onSelect, onCustomColorSelect, selectedColors }) => {
                   position: 'relative',
                 }}
                 onClick={() => handleColorRemove(color)}
-              >
-                <IconButton
-                  size="small"
-                  sx={{
-                    position: 'absolute',
-                    top: -8,
-                    right: -8,
-                    bgcolor: 'white',
-                    '&:hover': { bgcolor: 'white' },
-                  }}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </Box>
+              />
             </Tooltip>
           </motion.div>
         ))}

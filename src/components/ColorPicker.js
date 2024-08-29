@@ -1,38 +1,59 @@
-import React from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
+import React, { useEffect, useRef } from 'react';
+import { Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 const ColorPicker = ({ color, onChange, onClose, position, customColors }) => {
+  const pickerRef = useRef(null);
+
+  useEffect(() => {
+    if (pickerRef.current) {
+      const rect = pickerRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let { x, y } = position;
+
+      // Adjust horizontal position if it's going out of the viewport
+      if (x + rect.width > viewportWidth) {
+        x = viewportWidth - rect.width - 10;
+      }
+
+      // Adjust vertical position if it's going out of the viewport
+      if (y + rect.height > viewportHeight) {
+        y = viewportHeight - rect.height - 10;
+      }
+
+      pickerRef.current.style.left = `${x}px`;
+      pickerRef.current.style.top = `${y}px`;
+    }
+  }, [position]);
+
   return (
     <Box
+      ref={pickerRef}
       sx={{
-        position: 'absolute',
-        zIndex: 2,
+        position: 'fixed',
+        zIndex: 2000,
         background: 'white',
         padding: 2,
         boxShadow: 3,
         borderRadius: 1,
-        left: position.x,
-        top: position.y,
         minWidth: 200,
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-        <Typography variant="subtitle1">Selected Color</Typography>
+        <Box
+          sx={{
+            width: 30,
+            height: 30,
+            backgroundColor: color,
+            border: '1px solid #ccc',
+          }}
+        />
         <IconButton size="small" onClick={onClose} sx={{ color: 'black' }}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
-      <Box
-        sx={{
-          width: '100%',
-          height: 40,
-          backgroundColor: color,
-          marginBottom: 2,
-          border: '1px solid #ccc',
-        }}
-      />
-      <Typography variant="subtitle1" sx={{ marginBottom: 1 }}>Custom Colors</Typography>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
         {customColors.map((c) => (
           <Box

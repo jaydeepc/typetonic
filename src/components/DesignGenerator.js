@@ -1,27 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button, CircularProgress, Box, Typography, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { motion } from 'framer-motion';
 
-const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated }) => {
+const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, selectedTheme }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPattern, setSelectedPattern] = useState('random');
 
-  const patterns = [
-    { name: 'Random', value: 'random' },
-    { name: 'Gradient', value: 'gradient' },
-    { name: 'Horizontal Stripes', value: 'hstripes' },
-    { name: 'Vertical Stripes', value: 'vstripes' },
-    { name: 'Checkerboard', value: 'checkerboard' },
-    { name: 'Waves', value: 'waves' },
-    { name: 'Triangles', value: 'triangles' },
-    { name: 'Diagonal', value: 'diagonal' },
-    { name: 'Radial', value: 'radial' },
-    { name: 'Spiral', value: 'spiral' },
-    { name: 'Diamond', value: 'diamond' },
-    { name: 'Mosaic', value: 'mosaic' },
-    { name: 'Zigzag', value: 'zigzag' },
-    { name: 'Concentric', value: 'concentric' },
-  ];
+  const patterns = useMemo(() => ({
+    general: [
+      { name: 'Random', value: 'random' },
+      { name: 'Gradient', value: 'gradient' },
+      { name: 'Horizontal Stripes', value: 'hstripes' },
+      { name: 'Vertical Stripes', value: 'vstripes' },
+      { name: 'Checkerboard', value: 'checkerboard' },
+      { name: 'Waves', value: 'waves' },
+      { name: 'Triangles', value: 'triangles' },
+      { name: 'Diagonal', value: 'diagonal' },
+      { name: 'Radial', value: 'radial' },
+      { name: 'Spiral', value: 'spiral' },
+      { name: 'Diamond', value: 'diamond' },
+      { name: 'Mosaic', value: 'mosaic' },
+      { name: 'Zigzag', value: 'zigzag' },
+      { name: 'Concentric', value: 'concentric' },
+    ],
+    countryFlags: [
+      { name: 'Stripes', value: 'hstripes' },
+      { name: 'Blocks', value: 'blocks' },
+    ],
+    nature: [
+      { name: 'Waves', value: 'waves' },
+      { name: 'Gradient', value: 'gradient' },
+      { name: 'Radial', value: 'radial' },
+    ],
+    horror: [
+      { name: 'Blood Splatter', value: 'splatter' },
+      { name: 'Cracked', value: 'cracked' },
+      { name: 'Fog', value: 'fog' },
+    ],
+    monster: [
+      { name: 'Scales', value: 'scales' },
+      { name: 'Slime', value: 'slime' },
+      { name: 'Fur', value: 'fur' },
+    ],
+  }), []);
 
   const generateDesign = async () => {
     setIsGenerating(true);
@@ -183,6 +204,91 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated }
           }
           break;
         
+        case 'blocks':
+          const blockSize = 3;
+          for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+              const blockIndex = Math.floor(i / blockSize) * 2 + Math.floor(j / blockSize);
+              row.push(getColor(blockIndex));
+            }
+            keyColors.push(row);
+          }
+          break;
+        
+        case 'splatter':
+          for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+              const random = Math.random();
+              if (random < 0.7) {
+                row.push(colors[0]); // Background color
+              } else {
+                row.push(colors[Math.floor(random * (colors.length - 1)) + 1]); // Splatter colors
+              }
+            }
+            keyColors.push(row);
+          }
+          break;
+        
+        case 'cracked':
+          for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+              const crackFactor = Math.sin(i * 0.5) * Math.cos(j * 0.5);
+              row.push(getColor(Math.floor(Math.abs(crackFactor * colors.length))));
+            }
+            keyColors.push(row);
+          }
+          break;
+        
+        case 'fog':
+          for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+              const fogFactor = (Math.sin(i * 0.2) + Math.cos(j * 0.2) + 2) / 4;
+              const colorIndex = Math.floor(fogFactor * (colors.length - 1));
+              row.push(colors[colorIndex]);
+            }
+            keyColors.push(row);
+          }
+          break;
+        
+        case 'scales':
+          for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+              const scaleIndex = Math.floor(Math.sin(i * 0.5) * Math.cos(j * 0.5) * colors.length);
+              row.push(getColor(Math.abs(scaleIndex)));
+            }
+            keyColors.push(row);
+          }
+          break;
+        
+        case 'slime':
+          for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+              const slimeFactor = (Math.sin(i * 0.3) * Math.cos(j * 0.3) + 1) / 2;
+              const colorIndex = Math.floor(slimeFactor * (colors.length - 1));
+              row.push(colors[colorIndex]);
+            }
+            keyColors.push(row);
+          }
+          break;
+        
+        case 'fur':
+          for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+              const furFactor = Math.random() * 0.3 + (Math.sin(i * 0.2) * Math.cos(j * 0.2) + 1) / 2;
+              const colorIndex = Math.floor(furFactor * (colors.length - 1));
+              row.push(colors[colorIndex]);
+            }
+            keyColors.push(row);
+          }
+          break;
+        
         case 'random':
         default:
           for (let i = 0; i < rows; i++) {
@@ -246,7 +352,7 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated }
             label="Design Pattern"
             onChange={(e) => setSelectedPattern(e.target.value)}
           >
-            {patterns.map((pattern) => (
+            {(patterns[selectedTheme] || patterns.general).map((pattern) => (
               <MenuItem key={pattern.value} value={pattern.value}>
                 {pattern.name}
               </MenuItem>
