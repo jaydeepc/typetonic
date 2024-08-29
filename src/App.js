@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import KeyboardSelector from './components/KeyboardSelector';
 import ColorPalette from './components/ColorPalette';
-import SVGRenderer from './components/SVGRenderer';
 import DesignGenerator from './components/DesignGenerator';
 import ColorPicker from './components/ColorPicker';
 import LandingPage from './components/LandingPage';
@@ -182,22 +181,6 @@ function App() {
                 />
               </Paper>
             </Grid>
-            {keyboardDesign && (
-              <Grid item xs={12} ref={resultRef}>
-                <Paper elevation={3} sx={{ p: 3, overflow: 'auto', position: 'relative' }} ref={svgContainerRef}>
-                  <SVGRenderer design={keyboardDesign} onKeyClick={handleKeyClick} />
-                  {colorPickerState && (
-                    <ColorPicker
-                      color={colorPickerState.color}
-                      onChange={handleColorChange}
-                      onClose={handleColorPickerClose}
-                      position={colorPickerState.position}
-                      customColors={availableColors}
-                    />
-                  )}
-                </Paper>
-              </Grid>
-            )}
           </Grid>
         </Box>
       </Container>

@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import { Box, Typography } from '@mui/material';
 import { keyboardLayouts } from '../utils/keyboardLayouts';
 import { motion } from 'framer-motion';
 
-const SVGRenderer = ({ design, onKeyClick }) => {
+const SVGRenderer = forwardRef(({ design, onKeyClick }, ref) => {
   const [scale, setScale] = useState(1);
   const containerRef = useRef(null);
   const svgRef = useRef(null);
@@ -116,7 +116,11 @@ const SVGRenderer = ({ design, onKeyClick }) => {
       </Typography>
       <Box sx={{ overflowX: 'auto', overflowY: 'hidden', pb: 2 }}>
         <svg
-          ref={svgRef}
+          ref={(el) => {
+            svgRef.current = el;
+            if (typeof ref === 'function') ref(el);
+            else if (ref) ref.current = el;
+          }}
           width={svgWidth}
           height={svgHeight}
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
@@ -144,6 +148,6 @@ const SVGRenderer = ({ design, onKeyClick }) => {
       </Box>
     </Box>
   );
-};
+});
 
 export default SVGRenderer;
