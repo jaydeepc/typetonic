@@ -52,7 +52,7 @@ function App() {
       <Container maxWidth="lg">
         <Box sx={{ my: 4 }}>
           <Typography variant="h2" component="h1" gutterBottom align="center">
-            Keychron Keyboard Designer
+            Welcome to Type Tonic
           </Typography>
           <Grid container spacing={3}>
             <Grid item xs={12} md={4}>
