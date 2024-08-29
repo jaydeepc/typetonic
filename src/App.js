@@ -11,6 +11,7 @@ import ColorPalette from './components/ColorPalette';
 import SVGRenderer from './components/SVGRenderer';
 import DesignGenerator from './components/DesignGenerator';
 import ColorPicker from './components/ColorPicker';
+import LandingPage from './components/LandingPage';
 
 const theme = createTheme({
   palette: {
@@ -62,6 +63,7 @@ const theme = createTheme({
 });
 
 function App() {
+  const [showLandingPage, setShowLandingPage] = useState(true);
   const [selectedKeyboard, setSelectedKeyboard] = useState('');
   const [selectedColors, setSelectedColors] = useState([]);
   const [availableColors, setAvailableColors] = useState([]);
@@ -69,6 +71,10 @@ function App() {
   const [colorPickerState, setColorPickerState] = useState(null);
   const svgContainerRef = useRef(null);
   const resultRef = useRef(null);
+
+  const handleGetStarted = () => {
+    setShowLandingPage(false);
+  };
 
   const handleKeyboardSelect = (keyboard) => {
     setSelectedKeyboard(keyboard);
@@ -123,6 +129,15 @@ function App() {
       resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [keyboardDesign]);
+
+  if (showLandingPage) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <LandingPage onGetStarted={handleGetStarted} />
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>

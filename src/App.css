@@ -1,6 +1,12 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
 .App {
   text-align: center;
-  font-family: Arial, sans-serif;
+  font-family: 'Poppins', Arial, sans-serif;
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
@@ -67,4 +73,47 @@ select {
 svg {
   border: 1px solid #ddd;
   margin-top: 20px;
+}
+
+/* Global styles for the landing page */
+.landing-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Responsive font sizes */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+  
+  button {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Apply animations to elements */
+.fade-in {
+  animation: fadeIn 1s ease-out;
+}
+
+.slide-in-up {
+  animation: slideInUp 1s ease-out;
 }
