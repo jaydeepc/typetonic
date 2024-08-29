@@ -9,7 +9,6 @@ import Grid from '@mui/material/Grid';
 import KeyboardSelector from './components/KeyboardSelector';
 import ColorPalette from './components/ColorPalette';
 import DesignGenerator from './components/DesignGenerator';
-import ColorPicker from './components/ColorPicker';
 import LandingPage from './components/LandingPage';
 
 const theme = createTheme({
@@ -67,8 +66,6 @@ function App() {
   const [selectedColors, setSelectedColors] = useState([]);
   const [availableColors, setAvailableColors] = useState([]);
   const [keyboardDesign, setKeyboardDesign] = useState(null);
-  const [colorPickerState, setColorPickerState] = useState(null);
-  const svgContainerRef = useRef(null);
   const resultRef = useRef(null);
 
   const handleGetStarted = () => {
@@ -91,36 +88,6 @@ function App() {
 
   const handleDesignGenerated = (design) => {
     setKeyboardDesign(design);
-  };
-
-  const handleKeyClick = (rowIndex, keyIndex, event) => {
-    if (keyboardDesign && svgContainerRef.current) {
-      const svgRect = svgContainerRef.current.getBoundingClientRect();
-      const x = event.clientX - svgRect.left;
-      const y = event.clientY - svgRect.top;
-      setColorPickerState({
-        rowIndex,
-        keyIndex,
-        color: keyboardDesign.keyColors?.[rowIndex]?.[keyIndex] || '#ffffff',
-        position: { x, y },
-      });
-    }
-  };
-
-  const handleColorChange = (color) => {
-    if (colorPickerState && keyboardDesign) {
-      const { rowIndex, keyIndex } = colorPickerState;
-      const newKeyColors = [...(keyboardDesign.keyColors || [])];
-      if (!newKeyColors[rowIndex]) {
-        newKeyColors[rowIndex] = [];
-      }
-      newKeyColors[rowIndex][keyIndex] = color;
-      setKeyboardDesign({ ...keyboardDesign, keyColors: newKeyColors });
-    }
-  };
-
-  const handleColorPickerClose = () => {
-    setColorPickerState(null);
   };
 
   useEffect(() => {
@@ -172,12 +139,13 @@ function App() {
                 />
               </Paper>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} ref={resultRef}>
               <Paper elevation={3} sx={{ p: 3 }}>
                 <DesignGenerator
                   selectedKeyboard={selectedKeyboard}
                   selectedColors={selectedColors}
                   onDesignGenerated={handleDesignGenerated}
+                  availableColors={availableColors}
                 />
               </Paper>
             </Grid>

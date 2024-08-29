@@ -1,14 +1,18 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Button, CircularProgress, Box, Typography, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { motion } from 'framer-motion';
 import { svgToPng } from '../utils/svgToPng';
 import SVGRenderer from './SVGRenderer';
+import ColorPicker from './ColorPicker';
 
-const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, selectedTheme }) => {
+const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, selectedTheme, availableColors }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPattern, setSelectedPattern] = useState('random');
   const [generatedDesign, setGeneratedDesign] = useState(null);
+  const [colorPickerState, setColorPickerState] = useState(null);
+  const [error, setError] = useState(null);
   const svgRef = useRef(null);
+  const containerRef = useRef(null);
 
   const patterns = useMemo(() => ({
     general: [
@@ -48,7 +52,7 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, 
     ],
   }), []);
 
-  const generateKeyColors = (pattern, colors, rows, cols) => {
+  const generateKeyColors = useCallback((pattern, colors, rows, cols) => {
     const keyColors = [];
     
     const getColor = (index) => colors[Math.abs(index) % colors.length];
@@ -117,10 +121,21 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, 
     }
     
     return keyColors;
-  };
+  }, []);
 
-  const generateDesign = async () => {
+  const generateDesign = useCallback(async () => {
+    console.log('Generating design...');
+    console.log('Selected keyboard:', selectedKeyboard);
+    console.log('Selected colors:', selectedColors);
+    console.log('Selected pattern:', selectedPattern);
+
+    if (!selectedKeyboard || selectedColors.length === 0) {
+      setError("Please select a keyboard and colors before generating a design.");
+      return;
+    }
+
     setIsGenerating(true);
+    setError(null);
     
     // Simulated API call to Claude
     const simulateClaudeAPI = async (keyboardType, colors, pattern) => {
@@ -142,25 +157,20 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, 
 
     try {
       const design = await simulateClaudeAPI(selectedKeyboard, selectedColors, selectedPattern);
+      console.log('Design generated:', design);
       setGeneratedDesign(design);
       onDesignGenerated(design);
     } catch (error) {
       console.error("Error generating design:", error);
-      // Handle error (e.g., show an error message to the user)
+      setError("Failed to generate design. Please try again.");
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [selectedKeyboard, selectedColors, selectedPattern, generateKeyColors, onDesignGenerated]);
 
   const handlePatternChange = (event) => {
     setSelectedPattern(event.target.value);
   };
-
-  useEffect(() => {
-    if (selectedKeyboard && selectedColors.length > 0 && selectedPattern) {
-      generateDesign();
-    }
-  }, [selectedKeyboard, selectedColors, selectedPattern]);
 
   const handleDownload = async () => {
     if (!generatedDesign || !svgRef.current) return;
@@ -176,11 +186,39 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, 
       document.body.removeChild(link);
     } catch (error) {
       console.error('Error downloading PNG:', error);
+      setError("Failed to download PNG. Please try again.");
     }
   };
 
+  const handleKeyClick = (rowIndex, keyIndex, event) => {
+    if (generatedDesign && containerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const x = event.clientX - containerRect.left;
+      const y = event.clientY - containerRect.top;
+      setColorPickerState({
+        rowIndex,
+        keyIndex,
+        color: generatedDesign.keyColors[rowIndex][keyIndex],
+        position: { x, y },
+      });
+    }
+  };
+
+  const handleColorChange = (color) => {
+    if (colorPickerState && generatedDesign) {
+      const { rowIndex, keyIndex } = colorPickerState;
+      const newKeyColors = [...generatedDesign.keyColors];
+      newKeyColors[rowIndex][keyIndex] = color;
+      setGeneratedDesign({ ...generatedDesign, keyColors: newKeyColors });
+    }
+  };
+
+  const handleColorPickerClose = () => {
+    setColorPickerState(null);
+  };
+
   return (
-    <Box sx={{ textAlign: 'center' }}>
+    <Box sx={{ textAlign: 'center' }} ref={containerRef}>
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -205,6 +243,16 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, 
             ))}
           </Select>
         </FormControl>
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={generateDesign}
+          disabled={isGenerating}
+          sx={{ mt: 2, ml: 2 }}
+        >
+          {isGenerating ? 'Generating...' : 'Generate Design'}
+        </Button>
         {generatedDesign && (
           <Button
             variant="contained"
@@ -225,9 +273,25 @@ const DesignGenerator = ({ selectedKeyboard, selectedColors, onDesignGenerated, 
           </Typography>
         </Box>
       )}
-      {generatedDesign && !isGenerating && (
+      {error && (
         <Box mt={4}>
-          <SVGRenderer design={generatedDesign} onKeyClick={() => {}} ref={svgRef} />
+          <Typography variant="body1" color="error">
+            {error}
+          </Typography>
+        </Box>
+      )}
+      {generatedDesign && !isGenerating && (
+        <Box mt={4} sx={{ position: 'relative' }}>
+          <SVGRenderer design={generatedDesign} onKeyClick={handleKeyClick} ref={svgRef} />
+          {colorPickerState && (
+            <ColorPicker
+              color={colorPickerState.color}
+              onChange={handleColorChange}
+              onClose={handleColorPickerClose}
+              position={colorPickerState.position}
+              customColors={availableColors}
+            />
+          )}
         </Box>
       )}
     </Box>
