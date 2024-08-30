@@ -11,6 +11,7 @@ import ColorPalette from './components/ColorPalette';
 import DesignGenerator from './components/DesignGenerator';
 import LandingPage from './components/LandingPage';
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 const theme = createTheme({
   palette: {
@@ -103,6 +104,7 @@ function App() {
         <CssBaseline />
         <LandingPage onGetStarted={handleGetStarted} />
         <SpeedInsights />
+        <Analytics />
       </ThemeProvider>
     );
   }
@@ -155,6 +157,7 @@ function App() {
         </Box>
       </Container>
       <SpeedInsights />
+      <Analytics />
     </ThemeProvider>
   );
 }
