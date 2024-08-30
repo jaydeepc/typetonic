@@ -7,7 +7,7 @@ const LandingPage = ({ onGetStarted }) => {
   const theme = useTheme();
 
   return (
-    <div className="landing-page" style={{ backgroundColor: theme.palette.background.default }}>
+    <div className="landing-page" style={{ backgroundColor: theme.palette.background.default, position: 'relative', minHeight: '100vh' }}>
       <Grid container className="full-height">
         <Grid item xs={12} md={6} className="content-container">
           <Box className="content" sx={{ color: theme.palette.text.primary }}>
@@ -36,6 +36,20 @@ const LandingPage = ({ onGetStarted }) => {
           <div className="background-image"></div>
         </Grid>
       </Grid>
+      <Typography 
+        variant="caption" 
+        component="p" 
+        sx={{ 
+          fontSize: '0.7rem', 
+          position: 'absolute', 
+          bottom: 10, 
+          right: 20, 
+          textAlign: 'right',
+          color: 'white'
+        }}
+      >
+        All rights reserved 2024 ©Jaydeep chakrabarty
+      </Typography>
     </div>
   );
 };

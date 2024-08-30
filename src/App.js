@@ -98,11 +98,18 @@ function App() {
     }
   }, [keyboardDesign]);
 
+  const Copyright = () => (
+    <Typography variant="caption" component="p" align="center" sx={{ mt: 2, mb: 1, fontSize: '0.7rem' }}>
+      All rights reserved 2024 ©Jaydeep chakrabarty
+    </Typography>
+  );
+
   if (showLandingPage) {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <LandingPage onGetStarted={handleGetStarted} />
+        <Copyright />
         <SpeedInsights />
         <Analytics />
       </ThemeProvider>
@@ -155,6 +162,7 @@ function App() {
             </Grid>
           </Grid>
         </Box>
+        <Copyright />
       </Container>
       <SpeedInsights />
       <Analytics />
